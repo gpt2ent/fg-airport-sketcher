@@ -12,4 +12,4 @@ Since this program does not rebuild terrain, your resulting airport will be a fl
 
 1. This program utilizes Docker TerraGear image to convert the airport data. Therefore, you need to have Docker installed. Additionally, on Linux, it should be able to start without sudo: see [this page](https://docs.docker.com/engine/install/linux-postinstall/) if you can only run docker with sudo.
 2. This program has been written for FlightGear 2020.3 and tested on version 2020.3.18.
-3. This program has been tested with python==3.11.4, pexpect==4.8.0, numpy==1.25.2.
+3. This program has been tested with python==3.11.4, numpy==1.25.2.

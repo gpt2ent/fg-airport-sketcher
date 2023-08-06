@@ -2,11 +2,11 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import ttk
 import numpy as np
-import pexpect
 import os
 import re
 import shutil
 import tempfile
+import subprocess
 
 """
 Explanation of the pattern:
@@ -152,13 +152,17 @@ class App(ttk.Frame):
         self.write_log('Initialized')
 
         try:
-            docker_check = pexpect.spawn('docker images flightgear/terragear:ws20')
-            docker_check.expect('.*flightgear/terragear.*')
-            self.write_log('Docker image found: flightgear/terragear:ws20')
-            self.does_docker_exist = True
-        except pexpect.EOF:
-            self.write_log('Docker image not found. Downloading...')
-            self.download_image()
+            docker_check = subprocess.run(['docker', 'images', 'flightgear/terragear:ws20'], capture_output=True, text=True)
+            if 'flightgear/terragear' in docker_check.stdout:
+                self.write_log('Docker image found: flightgear/terragear:ws20')
+                self.does_docker_exist = True
+            else:
+                self.write_log('Docker image not found. Downloading...')
+                self.download_image()
+        except subprocess.CalledProcessError as e:
+            # Handle any error that occurred while running the Docker command
+            self.write_log('Error occurred while checking Docker image')
+
 
     def select_dat_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("DAT Files", "*.dat")])
@@ -255,43 +259,42 @@ class App(ttk.Frame):
 
         # Step 5. Run terragear docker container in detached shell mode
         self.write_log('Running terragear container')
-        self.write_log(f'Docker run -v {tgworkdir.name}:/terragear-work/ -dit --name terragear flightgear/terragear:ws20 /bin/bash')
-        docker_run_result = pexpect.run(f'docker run --rm -v {tgworkdir.name}:/terragear-work/ -dit --name terragear flightgear/terragear:ws20 /bin/bash')
-        self.write_log(str(docker_run_result, encoding='utf-8'))
+        runstr = f'docker run -v {tgworkdir.name}:/terragear-work/ -dit --name terragear flightgear/terragear:ws20 /bin/bash'
+        self.write_log(runstr)
+        docker_run_result = subprocess.run(runstr.split(), capture_output=True, text=True).stdout
+        self.write_log(docker_run_result)
         self.progressbar.step(10)
         self.update()
 
 
         # Step 6. Exec hgtchop
         self.write_log('Running hgtchop')
-        self.write_log(f'Docker exec -w /terragear-work/ terragear hgtchop 3 {hgtfilename} work/elev')
-        hgtchop_result = pexpect.run(f'docker exec -w /terragear-work/ terragear hgtchop 3 {hgtfilename} work/elev')
-        hgtchop_result = str(hgtchop_result, encoding='utf-8').split('\n')
+        runstr = f'docker exec -w /terragear-work/ terragear hgtchop 3 {hgtfilename} work/elev'
+        self.write_log(runstr)
+        hgtchop_result = subprocess.run(runstr.split(), capture_output=True, text=True).stdout.split('\n')
         self.write_log(f'Hgtchop generated {len(hgtchop_result)} lines.')
-        # print("\n".join(hgtchop_result))
+        print("\n".join(hgtchop_result))
         self.progressbar.step(10)
         self.update()
 
 
         # Step 7. Exec terrafit
         self.write_log('Running terrafit')
-        self.write_log(f'Docker exec -w /terragear-work/ terragear terrafit work/elev')
-        terrafit_result = pexpect.run('docker exec -w /terragear-work/ terragear terrafit work/elev')
-        terrafit_result = str(terrafit_result, encoding='utf-8').split('\n')
+        runstr = 'docker exec -w /terragear-work/ terragear terrafit work/elev'
+        self.write_log(runstr)
+        terrafit_result = subprocess.run(runstr.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True).stdout.split('\n')
         self.write_log(f"Terrafit generated {len(terrafit_result)} lines.")
-        # print("\n".join(terrafit_result))
         self.progressbar.step(10)
         self.update()
 
         # Step 8. Exec genapts
         self.write_log('Running genapts')
-        self.write_log(f'Docker exec -w /terragear-work/ terragear genapts850 --threads --input={self.airport.icao}.dat --work=./work --dem-path=elev')
-        genapts_result = pexpect.run(f'docker exec -w /terragear-work/ terragear genapts850 --threads --input={self.airport.icao}.dat --work=./work --dem-path=elev')
-        genapts_result = str(genapts_result, encoding='utf-8').split('\n')
+        runstr = f'docker exec -w /terragear-work/ terragear genapts850 --threads --input={self.airport.icao}.dat --work=./work --dem-path=elev'
+        self.write_log(runstr)
+        genapts_result = subprocess.run(runstr.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True).stdout.split('\n')
         self.write_log(f"Genapts generated {len(genapts_result)} lines.")
         self.write_log("Last 5 lines:\n")
         self.write_log("\n".join(genapts_result[-5:]))
-        # print("\n".join(genapts_result))
         self.progressbar.step(10)
         self.update()
 
@@ -329,8 +332,8 @@ class App(ttk.Frame):
         # Cleanup:
         # Cleanup step 1: kill docker container. check with docker ps -a
         self.write_log('Killing terragear container')
-        pexpect.run('docker kill terragear')
-        pexpect.run('docker rm terragear')
+        subprocess.run(['docker', 'kill', 'terragear'])
+        subprocess.run(['docker', 'rm', 'terragear'])
         self.progressbar.step(1)
         self.update()
 
@@ -425,13 +428,17 @@ class App(ttk.Frame):
     def download_image(self):
         self.disable_all_buttons()
         try:
-            docker_download = pexpect.spawn('docker pull flightgear/terragear:ws20')
-            docker_download.expect('.*Status: Downloaded newer image.*')
-            self.write_log('Docker image downloaded: flightgear/terragear:ws20')
-            self.enable_all_buttons()
-            self.does_docker_exist = True
-        except pexpect.EOF:
-            self.write_log('Docker not found. Please install Docker using the following link: https://docs.docker.com/get-docker/')
+            docker_download = subprocess.run(['docker', 'pull', 'flightgear/terragear:ws20'], capture_output=True, text=True)
+            if 'Status: Downloaded newer image' in docker_download.stdout:
+                self.write_log('Docker image downloaded: flightgear/terragear:ws20')
+                self.enable_all_buttons()
+                self.does_docker_exist = True
+            else:
+                self.write_log('Docker not found. Please install Docker using the following link: https://docs.docker.com/get-docker/')
+        except subprocess.CalledProcessError:
+            # Handle any error that occurred while running the Docker command
+            self.write_log('Error occurred while downloading Docker image')
+
 
     def change_state_all_buttons(self, state=tk.DISABLED):
         self.process_button["state"] = state
