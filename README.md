@@ -8,7 +8,15 @@ Since this program does not rebuild terrain, your resulting airport will be a fl
 
 ![](docs-images/fgfs-20230806201655.png)
 
-As of now, the program does not automatically create .xml airport metadata.
+As of now, the program does not automatically create .xml airport metadata. This includes the following features:
+
+- parking spots
+- taxiways
+- ILS
+- AI traffic data
+- SID/STAR
+
+The program also does not create fixes or navaids for your airport.
 
 One of the points of the program does not need any elevation data - it generates fake elevation data from constant elevation value.
 
@@ -29,6 +37,10 @@ One of the points of the program does not need any elevation data - it generates
     - In order to figure out elevation level for your airport, go to your airport with UFO and hover over the highest area. From menu, open `Debug -> browse internal properties` and find property `/position/ground-elev-m`. Round it up to a nearest integer and use it as the value.
 5. Choose output scenery folder with `Select folder` button. This folder does not need to be empty.
 6. Press `Process airport`. If there are no errors in the logs, your scenery should be able to load into FlightGear. A sample good log is below.
+
+# Bug reporting
+
+Feel free to open issues, but note that currently I'm not interested to test the program under Win/Mac OS. If you have found that the program doesn't work on these OSes, feel free to fork this script and modify it.
 
 # Sample logs
 
