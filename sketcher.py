@@ -250,6 +250,7 @@ class App(ttk.Frame):
         hgtfilename = self.airport.elevation_filename
 
         with open(os.path.join(tgworkdir.name, hgtfilename), "wb") as hgtfile:
+            # Thanks to https://github.com/SurferTim/HGTEditor for showing how to manipulate .hgt format
             array = (np.ones((1201, 1201))*int(height)).astype(">i2")
             hgtfile.write(array)
 

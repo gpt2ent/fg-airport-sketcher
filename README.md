@@ -10,11 +10,13 @@ Since this program does not rebuild terrain, your resulting airport will be a fl
 
 As of now, the program does not automatically create .xml airport metadata.
 
+One of the points of the program does not need any elevation data - it generates fake elevation data from constant elevation value.
+
 # Dependencies
 
 1. This program utilizes Docker TerraGear image to convert the airport data. Therefore, you need to have Docker installed. Additionally, on Linux, it should be able to start without sudo: see [this page](https://docs.docker.com/engine/install/linux-postinstall/) if you can only run docker with sudo.
 2. This program has been written for FlightGear 2020.3 and tested on version 2020.3.18.
-3. This program has been tested with python==3.11.4, numpy==1.25.2 on Ubuntu Linux. However, you should be able to run it in Windows and slightly older versions of python3 and numpy, as nothing too new is used.
+3. This program has been tested with python==3.11.4, numpy==1.25.2 on Ubuntu Linux. However, in theory you should be able to run it in Windows and slightly older versions of python3 and numpy, as nothing too new is used.
 
 # Usage
 
@@ -24,7 +26,8 @@ As of now, the program does not automatically create .xml airport metadata.
 2. Run the program via `python3 sketcher.py`.
 3. Choose `apt.dat` file for your airport with `Select .dat file` button. Look at the log window and make sure no errors are displayed.
 4. The program will suggest to you elevation level converted from .dat file. Input the elevation level. If your airport is too low and clips through scenery, try raising the elevation level.
-5. Choose output scenery folder with `Select folder` button.
+    - In order to figure out elevation level for your airport, go to your airport with UFO and hover over the highest area. From menu, open `Debug -> browse internal properties` and find property `/position/ground-elev-m`. Round it up to a nearest integer and use it as the value.
+5. Choose output scenery folder with `Select folder` button. This folder does not need to be empty.
 6. Press `Process airport`. If there are no errors in the logs, your scenery should be able to load into FlightGear. A sample good log is below.
 
 # Sample logs
