@@ -141,7 +141,7 @@ class App(ttk.Frame):
         self.process_button.grid(row=4, column=0, columnspan=3)
 
         # Disabled textarea for log output
-        self.log_textarea = tk.Text(self, state=tk.DISABLED)
+        self.log_textarea = tk.Text(self, state=tk.DISABLED, bg="white")
         self.log_textarea.grid(row=5, column=0, columnspan=3, sticky='nsew')
         self.log_textarea.bind("<1>", lambda event: self.log_textarea.focus_set())
 
@@ -165,14 +165,14 @@ class App(ttk.Frame):
 
 
     def select_dat_file(self):
-        file_path = filedialog.askopenfilename(filetypes=[("DAT Files", "*.dat")])
+        file_path = filedialog.askopenfilename(filetypes=[("DAT Files", "*.dat")], master=self.master)
         self.dat_file_entry.delete(0, tk.END)
         self.dat_file_entry.insert(0, file_path)
         # self.loaded_file_label["text"] = "Loaded file: " + file_path
         self.parse_airport_data()
 
     def select_output_folder(self):
-        folder_path = filedialog.askdirectory()
+        folder_path = filedialog.askdirectory(master=self.master)
         self.output_folder_entry.insert(tk.END, folder_path)
         
     def log_validation_failed(self):
@@ -459,5 +459,7 @@ class App(ttk.Frame):
 
 if __name__ == '__main__':
     root = tk.Tk()
+    root.option_add('*foreground', 'black')
+    root.option_add('*activeForeground','black')
     app = App(master=root)
     app.mainloop()
