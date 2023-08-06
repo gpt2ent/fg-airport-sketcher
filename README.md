@@ -2,13 +2,13 @@
 
 This script allows you to convert airport from X-Plane .dat format to FlightGear scenery format.
 
-Since this program does not rebuild terrain, your resulting airport will be a flat plane laying over the scenery. If the nearby scenery is not a perfect flat plane, some parts of your airport will hang in the air. Therefore, this tool only "sketches" the airport and cannot be a complete substitute to full TerraGear pipeline. However, it may be useful for people that want to quickly get a rough airport in their program.
+❕ Since this program does not rebuild terrain, your resulting airport will be a flat plane laying over the scenery. If the nearby scenery is not a perfect flat plane, some parts of your airport will hang in the air. Therefore, this tool only "sketches" the airport and cannot be a complete substitute to full TerraGear pipeline. However, it may be useful for people that want to quickly get a rough airport in their program.
 
 ![](docs-images/2023-08-06_23-14.png)
 
 ![](docs-images/fgfs-20230806201655.png)
 
-As of now, the program does not automatically create .xml airport metadata. This includes the following features:
+❕ As of now, the program does not automatically create .xml airport metadata. This includes the following features:
 
 - parking spots
 - taxiways
@@ -20,7 +20,7 @@ The program also does not create fixes or navaids for your airport.
 
 One of the points of the program does not need any elevation data - it generates fake elevation data from constant elevation value.
 
-# Dependencies
+# ❕ Dependencies
 
 1. This program utilizes Docker TerraGear image to convert the airport data. Therefore, you need to have Docker installed. Additionally, on Linux, it should be able to start without sudo: see [this page](https://docs.docker.com/engine/install/linux-postinstall/) if you can only run docker with sudo.
 2. This program has been written for FlightGear 2020.3 and tested on version 2020.3.18.
@@ -29,8 +29,8 @@ One of the points of the program does not need any elevation data - it generates
 # Usage
 
 1. [Create](https://developer.x-plane.com/tools/worldeditor/) or [download](https://gateway.x-plane.com/airports) your desired airport.
-    - This tool supports `apt.dat` files versions from 10.00 to 11.00. If you downloaded newer file, you can convert it to older format using [WED](https://developer.x-plane.com/tools/worldeditor/).
-    - This tool can convert only files containing exactly 1 airport with at least 1 runway.
+    - ❕ This tool supports `apt.dat` files versions from 10.00 to 11.00. If you downloaded newer file, you can convert it to older format using [WED](https://developer.x-plane.com/tools/worldeditor/).
+    - ❕ This tool can convert only files containing exactly 1 airport with at least 1 runway.
 2. Run the program via `python3 sketcher.py`.
 3. Choose `apt.dat` file for your airport with `Select .dat file` button. Look at the log window and make sure no errors are displayed.
 4. The program will suggest to you elevation level converted from .dat file. Input the elevation level. If your airport is too low and clips through scenery, try raising the elevation level.
@@ -40,7 +40,7 @@ One of the points of the program does not need any elevation data - it generates
 
 # Bug reporting
 
-Feel free to open issues, but note that currently I'm not interested to test the program under Win/Mac OS. If you have found that the program doesn't work on these OSes, feel free to fork this script and modify it.
+❕ Feel free to open issues, but note that currently I'm not interested to test the program under Win/Mac OS. If you have found that the program doesn't work on these OSes, feel free to fork this script and modify it.
 
 # Sample logs
 
