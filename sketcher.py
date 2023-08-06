@@ -174,7 +174,7 @@ class App(ttk.Frame):
     def select_output_folder(self):
         folder_path = filedialog.askdirectory(master=self.master)
         self.output_folder_entry.insert(tk.END, folder_path)
-        
+
     def log_validation_failed(self):
         self.write_log('='*50)
         self.write_log('VALIDATION FAILED! SEE ABOVE LOG FOR DETAILS')
@@ -274,7 +274,6 @@ class App(ttk.Frame):
         self.write_log(runstr)
         hgtchop_result = subprocess.run(runstr.split(), capture_output=True, text=True).stdout.split('\n')
         self.write_log(f'Hgtchop generated {len(hgtchop_result)} lines.')
-        print("\n".join(hgtchop_result))
         self.progressbar.step(10)
         self.update()
 
