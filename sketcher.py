@@ -59,8 +59,8 @@ class Airport:
     def process_lats_lons(self):
         if len(self.lats) == 0:
             return False
-        self.lat = int(np.mean(self.lats))
-        self.lon = int(np.mean(self.lons))
+        self.lat = int(np.floor(np.mean(self.lats)))
+        self.lon = int(np.floor(np.mean(self.lons)))
 
         lat_hemi = "N" if self.lat > 0 else "S"
         lon_hemi = "E" if self.lon > 0 else "W"
@@ -143,6 +143,7 @@ class App(ttk.Frame):
         # Disabled textarea for log output
         self.log_textarea = tk.Text(self, state=tk.DISABLED)
         self.log_textarea.grid(row=5, column=0, columnspan=3, sticky='nsew')
+        self.log_textarea.bind("<1>", lambda event: self.log_textarea.focus_set())
 
         # Progressbar
         self.progressbar = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=200, mode='determinate')
@@ -169,6 +170,11 @@ class App(ttk.Frame):
     def select_output_folder(self):
         folder_path = filedialog.askdirectory()
         self.output_folder_entry.insert(tk.END, folder_path)
+        
+    def log_validation_failed(self):
+        self.write_log('='*50)
+        self.write_log('VALIDATION FAILED! SEE ABOVE LOG FOR DETAILS')
+        self.write_log('='*50)
 
     def process_airport(self):
         dat_file_path = self.dat_file_entry.get()
@@ -181,24 +187,29 @@ class App(ttk.Frame):
 
         if not dat_file_path or not os.path.isfile(dat_file_path):
             self.write_log("Invalid DAT file path or file does not exist.")
+            self.log_validation_failed()
             return
 
         if not self.airport.is_ready():
             self.write_log("Invalid airport data. See above log for details.")
+            self.log_validation_failed()
             return
 
         if not output_folder_path:
             self.write_log("Output folder path is empty.")
+            self.log_validation_failed()
             return
 
         try:
             int(height)
         except ValueError:
             self.write_log("Invalid height value.")
+            self.log_validation_failed()
             return
 
         if not self.does_docker_exist:
             self.write_log("Cannot process airport without Docker.")
+            self.log_validation_failed()
             return
 
         self.write_log('='*50)
@@ -206,7 +217,7 @@ class App(ttk.Frame):
         self.write_log('='*50)
 
         self.progressbar.step(1)
-        
+
         self.disable_all_buttons()
 
         # Step 1. In scenario folder, create folders /NavData/apt, copy dat file to /NavData/apt as {icao}.dat
@@ -226,7 +237,7 @@ class App(ttk.Frame):
         # Step 3. Copy the dat file to the temporary folder
         shutil.copy(dat_file_path, os.path.join(tgworkdir.name, f"{self.airport.icao}.dat"))
         self.progressbar.step(10)
-        
+
         self.update()
 
         # Step 4. Create fake hgt file in tempfolder
@@ -239,7 +250,7 @@ class App(ttk.Frame):
             hgtfile.write(array)
 
         self.progressbar.step(10)
-        
+
         self.update()
 
         # Step 5. Run terragear docker container in detached shell mode
@@ -336,6 +347,12 @@ class App(ttk.Frame):
         dat_file_path = self.dat_file_entry.get()
         with open(dat_file_path, "r") as file:
             file_contents = file.read()
+
+        dat_version = int(file_contents.split("\n")[1].split()[0])
+        if dat_version < 1000 or dat_version > 1100:
+            self.write_log("Error: This .dat file is not supported.")
+            self.write_log(f"This dat file is version {dat_version}. Supported versions are 10** and 1100")
+            return
 
         matches = re.findall(REGEX_AIRPORT, file_contents, re.MULTILINE)
 
