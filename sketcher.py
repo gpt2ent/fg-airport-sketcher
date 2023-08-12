@@ -173,6 +173,7 @@ class App(ttk.Frame):
 
     def select_output_folder(self):
         folder_path = filedialog.askdirectory(master=self.master)
+        self.output_folder_entry.delete(0, tk.END)
         self.output_folder_entry.insert(tk.END, folder_path)
 
     def log_validation_failed(self):
